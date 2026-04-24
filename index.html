@@ -3,112 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文字数カウンター (多機能版)</title>
+    <title>文字数カウンター</title>
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #333;
+            --sub-text-color: #6c757d;
+        }
+
         body {
-            font-family: sans-serif;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             display: flex;
             justify-content: center;
-            padding: 20px;
-            background-color: #f5f5f7;
+            padding: 40px 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
         }
+
         .container {
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+
+        h2 {
+            text-align: left;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+        }
+
         textarea {
             width: 100%;
-            height: 250px;
-            padding: 15px;
+            height: 300px;
+            padding: 20px;
             box-sizing: border-box;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            line-height: 1.5;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 15px;
+            line-height: 1.6;
             resize: vertical;
-            transition: border-color 0.2s;
+            transition: all 0.2s ease;
+            background-color: #fff;
         }
+
         textarea:focus {
-            border-color: #007bff;
+            border-color: var(--primary-color);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.05);
         }
-        /* ボタンエリアのスタイル */
+
         .button-group {
-            margin-top: 15px;
+            margin-top: 20px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            justify-content: space-between; /* 左右に配置 */
         }
+
         button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
+            padding: 10px 24px;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: opacity 0.2s;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
-        .copy-btn { background-color: #007bff; color: white; }
-        .clear-btn { background-color: #6c757d; color: white; }
-        button:hover { opacity: 0.8; }
-        button:active { transform: translateY(1px); }
+
+        .copy-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .copy-btn:hover {
+            background-color: #1a252f;
+        }
+
+        .clear-btn {
+            background: transparent;
+            color: var(--sub-text-color);
+            border-color: var(--border-color);
+        }
+
+        .clear-btn:hover {
+            background-color: #f1f3f5;
+            color: var(--primary-color);
+        }
 
         .stats {
-            margin-top: 20px;
+            margin-top: 40px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            gap: 20px;
         }
+
         .stat-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #eee;
+            text-align: left;
         }
+
         .label {
             display: block;
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--sub-text-color);
+            margin-bottom: 8px;
         }
+
         .count {
             display: block;
-            font-size: 22px;
-            font-weight: bold;
-            color: #007bff;
+            font-size: 26px;
+            font-weight: 300;
+            color: var(--primary-color);
         }
-        .highlight { color: #e83e8c; }
+
+        /* 空白なしを強調 */
+        .primary-stat .label {
+            color: var(--accent-color);
+        }
+        .primary-stat .count {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>文字数カウンター</h2>
-    <textarea id="inputText" placeholder="文章を入力してください..."></textarea>
+    <textarea id="inputText" placeholder="文章を入力または貼り付けてください..."></textarea>
     
     <div class="button-group">
-        <button class="copy-btn" id="copyBtn">テキストをコピー</button>
-        <button class="clear-btn" id="clearBtn">全消去</button>
+        <button class="clear-btn" id="clearBtn">内容をクリア</button>
+        <button class="copy-btn" id="copyBtn">文章をコピー</button>
     </div>
 
     <div class="stats">
-        <div class="stat-item">
-            <span class="label">英単語数 (Words)</span>
-            <span id="wordCount" class="count highlight">0</span>
+        <div class="stat-item primary-stat">
+            <span class="label">文字数 (空白なし)</span>
+            <span id="charNoSpaceCount" class="count">0</span>
         </div>
         <div class="stat-item">
-            <span class="label">文字数 (スペース込)</span>
+            <span class="label">文字数 (空白あり)</span>
             <span id="charCount" class="count">0</span>
         </div>
         <div class="stat-item">
-            <span class="label">文字数 (スペース無)</span>
-            <span id="charNoSpaceCount" class="count">0</span>
+            <span class="label">英単語数</span>
+            <span id="wordCount" class="count">0</span>
         </div>
         <div class="stat-item">
             <span class="label">行数</span>
@@ -126,59 +177,51 @@
     const copyBtn = document.getElementById('copyBtn');
     const clearBtn = document.getElementById('clearBtn');
 
-    // カウント処理を関数として独立（自動保存の復元時にも使うため）
     function updateCounts() {
         const fullText = textArea.value;
         const trimmedText = fullText.trim();
+
+        // 文字数 (空白なし)
+        const noSpaceText = fullText.replace(/\s+/g, '');
+        charNoSpaceCount.textContent = noSpaceText.length;
+
+        // 文字数 (空白込み)
+        charCount.textContent = fullText.length;
 
         // 英単語数
         const words = trimmedText.match(/\b[-a-zA-Z0-9']+\b/g);
         wordCount.textContent = words ? words.length : 0;
 
-        // 文字数 (込)
-        charCount.textContent = fullText.length;
-
-        // 文字数 (無)
-        const noSpaceText = fullText.replace(/\s+/g, '');
-        charNoSpaceCount.textContent = noSpaceText.length;
-
         // 行数
         lineCount.textContent = fullText ? fullText.split(/\r\n|\r|\n/).length : 0;
 
-        // 【自動保存】localStorageにテキストを保存
-        localStorage.setItem('savedText', fullText);
+        // 自動保存
+        localStorage.setItem('smartCounterTextJP', fullText);
     }
 
-    // 入力時のイベント
     textArea.addEventListener('input', updateCounts);
 
-    // 【自動保存】ページ読み込み時に保存データを復元
     window.addEventListener('DOMContentLoaded', () => {
-        const savedData = localStorage.getItem('savedText');
+        const savedData = localStorage.getItem('smartCounterTextJP');
         if (savedData) {
             textArea.value = savedData;
-            updateCounts(); // 復元後にカウントを更新
+            updateCounts();
         }
     });
 
-    // 【コピーボタン】の処理
     copyBtn.addEventListener('click', () => {
         if (!textArea.value) return;
-        
         navigator.clipboard.writeText(textArea.value).then(() => {
             const originalText = copyBtn.innerText;
-            copyBtn.innerText = "コピー完了！";
+            copyBtn.innerText = "コピー完了";
             setTimeout(() => {
                 copyBtn.innerText = originalText;
-            }, 2000);
-        }).catch(err => {
-            alert("コピーに失敗しました。");
+            }, 1500);
         });
     });
 
-    // 【全消去ボタン】の処理
     clearBtn.addEventListener('click', () => {
-        if (confirm("入力した内容をすべて消去しますか？")) {
+        if (textArea.value && confirm("内容をすべて消去しますか？")) {
             textArea.value = "";
             updateCounts();
         }
