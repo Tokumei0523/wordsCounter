@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文字数カウンター</title>
+    <title>文字数カウンター (多機能版)</title>
     <style>
         body {
             font-family: sans-serif;
@@ -37,6 +37,27 @@
             border-color: #007bff;
             outline: none;
         }
+        /* ボタンエリアのスタイル */
+        .button-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .copy-btn { background-color: #007bff; color: white; }
+        .clear-btn { background-color: #6c757d; color: white; }
+        button:hover { opacity: 0.8; }
+        button:active { transform: translateY(1px); }
+
         .stats {
             margin-top: 20px;
             display: grid;
@@ -62,7 +83,7 @@
             font-weight: bold;
             color: #007bff;
         }
-        .highlight { color: #e83e8c; } /* 単語数を目立たせる */
+        .highlight { color: #e83e8c; }
     </style>
 </head>
 <body>
@@ -71,6 +92,11 @@
     <h2>文字数カウンター</h2>
     <textarea id="inputText" placeholder="文章を入力してください..."></textarea>
     
+    <div class="button-group">
+        <button class="copy-btn" id="copyBtn">テキストをコピー</button>
+        <button class="clear-btn" id="clearBtn">全消去</button>
+    </div>
+
     <div class="stats">
         <div class="stat-item">
             <span class="label">英単語数 (Words)</span>
@@ -97,24 +123,65 @@
     const charCount = document.getElementById('charCount');
     const charNoSpaceCount = document.getElementById('charNoSpaceCount');
     const lineCount = document.getElementById('lineCount');
+    const copyBtn = document.getElementById('copyBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
-    textArea.addEventListener('input', () => {
-        const text = textArea.value.trim();
+    // カウント処理を関数として独立（自動保存の復元時にも使うため）
+    function updateCounts() {
+        const fullText = textArea.value;
+        const trimmedText = fullText.trim();
 
-        // 英単語数のカウント
-        // 半角英数字の連続を1単語としてカウント
-        const words = text.match(/\b[-a-zA-Z0-9']+\b/g);
+        // 英単語数
+        const words = trimmedText.match(/\b[-a-zA-Z0-9']+\b/g);
         wordCount.textContent = words ? words.length : 0;
 
-        // 全文字数 (元の入力値を使用)
-        charCount.textContent = textArea.value.length;
+        // 文字数 (込)
+        charCount.textContent = fullText.length;
 
-        // スペース・改行を除いた文字数
-        const noSpaceText = textArea.value.replace(/\s+/g, '');
+        // 文字数 (無)
+        const noSpaceText = fullText.replace(/\s+/g, '');
         charNoSpaceCount.textContent = noSpaceText.length;
 
         // 行数
-        lineCount.textContent = textArea.value ? textArea.value.split(/\r\n|\r|\n/).length : 0;
+        lineCount.textContent = fullText ? fullText.split(/\r\n|\r|\n/).length : 0;
+
+        // 【自動保存】localStorageにテキストを保存
+        localStorage.setItem('savedText', fullText);
+    }
+
+    // 入力時のイベント
+    textArea.addEventListener('input', updateCounts);
+
+    // 【自動保存】ページ読み込み時に保存データを復元
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedData = localStorage.getItem('savedText');
+        if (savedData) {
+            textArea.value = savedData;
+            updateCounts(); // 復元後にカウントを更新
+        }
+    });
+
+    // 【コピーボタン】の処理
+    copyBtn.addEventListener('click', () => {
+        if (!textArea.value) return;
+        
+        navigator.clipboard.writeText(textArea.value).then(() => {
+            const originalText = copyBtn.innerText;
+            copyBtn.innerText = "コピー完了！";
+            setTimeout(() => {
+                copyBtn.innerText = originalText;
+            }, 2000);
+        }).catch(err => {
+            alert("コピーに失敗しました。");
+        });
+    });
+
+    // 【全消去ボタン】の処理
+    clearBtn.addEventListener('click', () => {
+        if (confirm("入力した内容をすべて消去しますか？")) {
+            textArea.value = "";
+            updateCounts();
+        }
     });
 </script>
 
